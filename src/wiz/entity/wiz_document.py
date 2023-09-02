@@ -83,3 +83,24 @@ class WizDocument(object):
 
     def get_accessed(self):
         return datetime.strptime(self.accessed, FORMAT_STRING).timestamp()
+
+    def gen_front_matter(self):
+        front_matter = ["---"]
+        tags = self._gen_tags()
+        if tags:
+            front_matter.append(tags)
+        front_matter.append(f"date: {self.created}")
+        front_matter.append("---")
+        return "\n".join(front_matter)
+
+    def _gen_tags(self):
+        if len(self.tags) == 0:
+            return None
+
+        tags = []
+        for tag in self.tags:
+            tags.append(f'  - {tag.name}')
+
+        tags = "\n".join(tags)
+
+        return f"tags:\n{tags}"

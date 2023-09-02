@@ -25,7 +25,14 @@ def _convert_attachments(document: WizDocument, target_attachments_dir: Path):
         os.utime(target_attachment_file, (os.path.getctime(attachment_file), os.path.getmtime(attachment_file)))
 
 
-def _update_time(file: Path, document: WizDocument):
+def _add_front_matter_and_update_time(file: Path, document: WizDocument):
+    # 添加 front matter
+    # tags 标签
+    # date 创建时间
+    text = file.read_text("UTF-8")
+    text = document.gen_front_matter() + "\n" + text
+    file.write_text(text, "UTF-8")
+    # 更新修改时间及访问时间
     os.utime(file, (document.get_accessed(), document.get_modified()))
 
 
@@ -136,7 +143,7 @@ class WizConvertor(object):
             # todolist 转为 md
             target_file = Path(str(target_file) + ".md")
             convert_td(file_extract_dir, target_file)
-            _update_time(target_file, document)
+            _add_front_matter_and_update_time(target_file, document)
             self._save_result(document, True)
             print(f"处理完成")
             return
@@ -146,7 +153,7 @@ class WizConvertor(object):
             target_file = Path(str(target_file) + ".md")
 
         convert_md(file_extract_dir, document.attachments, document.location + document.title, target_file, target_attachments_dir, self.wiz_storage)
-        _update_time(target_file, document)
+        _add_front_matter_and_update_time(target_file, document)
         self._save_result(document, True)
         if document.is_markdown():
             print(f"处理完成")
